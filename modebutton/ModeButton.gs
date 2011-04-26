@@ -28,7 +28,7 @@ namespace Gtk
     class ModeButton : EventBox
         event mode_added(index : int, widget : Widget)
         event mode_removed(index : int, widget : Widget)
-        event mode_changed(widget : Widget)
+        event mode_changed(index : int, widget : Widget)
         
         _selected : private int = -1
         _hovered : private int  = -1
@@ -68,7 +68,7 @@ namespace Gtk
                 queue_draw()
                 
                 selectedItem : Widget = value >= 0 ? box.get_children().nth_data(value) : null
-                mode_changed(selectedItem)
+                mode_changed(selected, selectedItem)
                 
         prop hovered : int
             get
@@ -238,6 +238,7 @@ namespace Gtk
             propagate_expose(this.child, evnt)    
             evnt.window.end_paint()
             return true
+
 /*
 init
     Gtk.init(ref args)
@@ -269,6 +270,14 @@ init
     m.append(l4)
     l4.show()
     
+    m.mode_changed.connect(ab)
+    
     Gtk.main()
-*/        
+    
+def ab(widget : Gtk.Widget)
+    print "a"
+*/
+
+
+        
             
