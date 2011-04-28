@@ -32,9 +32,9 @@ namespace Gtk
         
         _selected : private int = -1
         _hovered : private int  = -1
+        _mstyle : private int = 1
         box : private HBox
         button : Button
-        
         init
             this.add_events(EventMask.POINTER_MOTION_MASK | 
                             EventMask.BUTTON_PRESS_MASK   |
@@ -46,7 +46,7 @@ namespace Gtk
             add(this.box)
             this.box.show()
             
-            visibility_notify_event.connect(on_leave_notify_event)            
+            leave_notify_event.connect(on_leave_notify_event)            
             button_press_event.connect(on_button_press_event)
             motion_notify_event.connect(on_motion_notify_event)
             scroll_event.connect(on_scroll_event)
@@ -65,18 +65,25 @@ namespace Gtk
                     
                 _selected = value
                 box.get_children().nth_data(_selected).set_state(StateType.SELECTED)
-                queue_draw()
+                queue_draw ()
                 
                 selectedItem : Widget = value >= 0 ? box.get_children().nth_data(value) : null
                 mode_changed(selected, selectedItem)
                 
         prop hovered : int
             get
-                return this._hovered
+                return _hovered
                 
             set
                 _hovered = value
                 queue_draw ()
+                
+        prop mstyle : int
+            get
+                return _mstyle
+            
+            set
+                _mstyle = value
                 
         def append(widget : Widget)
             box.pack_start(widget, true, true, 5)
@@ -94,8 +101,8 @@ namespace Gtk
             if(_hovered >= index)
                 hovered--
             
-            this.mode_removed(index, child)
-            this.queue_draw()
+            mode_removed(index, child)
+            queue_draw ()
             
         def new focus(widget : Widget)
             select : int = box.get_children().index(widget)
@@ -112,15 +119,17 @@ namespace Gtk
                 when ScrollDirection.UP
                     if(selected < box.get_children().length() -1)
                         selected++
+                    else
+                        selected = 0
                 when ScrollDirection.DOWN
                     if(selected > 0)
                         selected--
-                default
-                    if(selected == 0)
-                        selected = (int) box.get_children().length() -1
                     else
-                        selected = 0
-                        
+                        selected = (int) box.get_children().length() -1
+                default
+                    var d = 1
+                    d += d
+            queue_draw()
                     
             return true
                 
@@ -130,11 +139,11 @@ namespace Gtk
                 
             return true
                 
-        def private on_leave_notify_event(evnt : Event) : bool
+        def private on_leave_notify_event(evnt : EventCrossing) : bool
             _hovered = -1
             queue_draw()
             
-            return true
+            return false
             
         def private on_motion_notify_event(evnt : EventMotion) : bool
             n_children : int = (int) box.get_children().length()
@@ -154,7 +163,7 @@ namespace Gtk
             if(i >= 0 && i < n_children)
                 this.hovered = i
                 
-            return false
+            return true
             
         def private on_expose_event(evnt : EventExpose) : bool
             clip_region : Rectangle = Gdk.Rectangle()
@@ -162,13 +171,24 @@ namespace Gtk
             this.button.show()
             this.button.hide()
             
+            styleA : ShadowType
+            styleB : ShadowType
+            if(_mstyle == 0)
+                styleA = ShadowType.IN
+                styleB = ShadowType.OUT
+            else //TODO: Add more styles
+                styleA = ShadowType.ETCHED_OUT
+                styleB = ShadowType.IN
+                
+                
+            
             evnt.window.begin_paint_rect(evnt.area)
             
             n_children : int = (int) box.get_children().length()
             
             style.draw_box (evnt.window,
                             StateType.NORMAL,
-                            ShadowType.IN,
+                            styleA,
                             evnt.area,
                             this.button,
                             "button",
@@ -190,7 +210,7 @@ namespace Gtk
                     
                 style.draw_box (evnt.window,
                                 StateType.SELECTED,
-                                ShadowType.ETCHED_OUT,
+                                styleB,
                                 clip_region,
                                 this.button,
                                 "button",
@@ -213,7 +233,7 @@ namespace Gtk
                 clip_region.height = evnt.area.height
                 
                 style.draw_box (evnt.window, StateType.PRELIGHT,
-                                ShadowType.IN,
+                                styleA,
                                 clip_region,
                                 this.button,
                                 "button",
@@ -238,22 +258,19 @@ namespace Gtk
             propagate_expose(this.child, evnt)    
             evnt.window.end_paint()
             return true
-
 /*
 init
     Gtk.init(ref args)
     var w = new Gtk.Window()
     var m = new Gtk.ModeButton()
-    var ad = (float) 0.5
-    var ad2 = ad
-    var af = new Gtk.AspectFrame("", ad, ad2, 1, true)
+    var af = new Gtk.AspectFrame("", 1, 0, 1, true)
     w.destroy.connect(Gtk.main_quit)
     m.show()
     af.add(m)
     af.show()
     w.add(af)
     w.show()
-    
+    m.mstyle = 1
     var l1 = new Gtk.Label("Left")
     m.append(l1)
     l1.show()
@@ -270,14 +287,11 @@ init
     m.append(l4)
     l4.show()
     
-    m.mode_changed.connect(ab)
-    
-    Gtk.main()
-    
-def ab(widget : Gtk.Widget)
-    print "a"
-*/
+    w.set_size_request(640, 480)
 
+    Gtk.main()
+*/    
+    
 
         
             
