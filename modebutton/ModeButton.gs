@@ -190,7 +190,7 @@ namespace Gtk
                             StateType.NORMAL,
                             styleA,
                             evnt.area,
-                            this.button,
+                            this,
                             "button",
                             evnt.area.x,
                             evnt.area.y,
@@ -212,7 +212,7 @@ namespace Gtk
                                 StateType.SELECTED,
                                 styleB,
                                 clip_region,
-                                this.button,
+                                this,
                                 "button",
                                 evnt.area.x,
                                 evnt.area.y,
@@ -235,7 +235,7 @@ namespace Gtk
                 style.draw_box (evnt.window, StateType.PRELIGHT,
                                 styleA,
                                 clip_region,
-                                this.button,
+                                this,
                                 "button",
                                 evnt.area.x,
                                 evnt.area.y,
@@ -290,8 +290,7 @@ init
     w.set_size_request(640, 480)
 
     Gtk.main()
-*/    
-    
+*/
 
         
             
